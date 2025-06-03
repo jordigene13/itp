@@ -60,6 +60,21 @@
       list-style-type: disc;
       padding-left: 20px;
     }
+    .pp-RSUXQKGP79CHQ {
+      text-align:center;
+      border:none;
+      border-radius:0.25rem;
+      min-width:11.625rem;
+      padding:0 2rem;
+      height:2.625rem;
+      font-weight:bold;
+      background-color:#FFD140;
+      color:#000000;
+      font-family:"Helvetica Neue",Arial,sans-serif;
+      font-size:1rem;
+      line-height:1.25rem;
+      cursor:pointer;
+    }
   </style>
 </head>
 <body>
@@ -84,10 +99,12 @@
       <li>Checklist de documentación necesaria</li>
     </ul>
     <div style="text-align: center; margin-top: 20px;">
-      <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
-        <input type="hidden" name="cmd" value="_s-xclick">
-        <input type="hidden" name="hosted_button_id" value="BDATX9YJUAfKL">
-        <button type="submit">Adquirir Pack Premium</button>
+      <form action="https://www.paypal.com/ncp/payment/RSUXQKGP79CHQ" method="post" target="_blank" style="display:inline-grid;justify-items:center;align-content:start;gap:0.5rem;">
+        <input class="pp-RSUXQKGP79CHQ" type="submit" value="Comprar ahora" />
+        <img src="https://www.paypalobjects.com/images/Debit_Credit_APM.svg" alt="cards" />
+        <section style="font-size: 0.75rem;">
+          Tecnología de <img src="https://www.paypalobjects.com/paypal-ui/logos/svg/paypal-wordmark-color.svg" alt="paypal" style="height:0.875rem;vertical-align:middle;"/>
+        </section>
       </form>
     </div>
   </div>
@@ -130,6 +147,12 @@
                         <strong>Detalle por tramos:</strong><br>${detalle}`;
 
       document.getElementById("resultado").innerHTML = resumen;
+    }
+
+    window.onload = function () {
+      if (window.location.hash === '#descargar-premium') {
+        alert("Gracias por tu compra. Iniciaremos la descarga del informe premium.");
+      }
     }
   </script>
 </body>
