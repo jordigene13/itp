@@ -1,31 +1,31 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Calculadora ITP Catalunya 2025</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Inter', sans-serif;
       background: #f5f2f0;
       color: #1c211f;
       display: flex;
       justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
+      align-items: flex-start;
+      padding: 30px;
+      gap: 40px;
     }
-    .container {
+    .container, .premium-info {
       background: #f5f2f0;
       padding: 20px;
-      max-width: 500px;
-      width: 100%;
+      width: 450px;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.05);
     }
     h2 {
       text-align: center;
+      font-weight: 800;
     }
     input, button {
       width: 100%;
@@ -35,7 +35,7 @@
       border-radius: 5px;
       box-sizing: border-box;
     }
-    input[type="number"], input[type="text"], input[type="email"] {
+    input[type="number"] {
       border: 1px solid #ccc;
       background: #fff;
       color: #1c211f;
@@ -46,16 +46,19 @@
       border: none;
       cursor: pointer;
     }
-    #resultado {
+    .resultado, .premium-info ul {
       margin-top: 15px;
       padding: 15px;
       background: #fff;
       border: 1px solid #ccc;
       border-radius: 5px;
     }
-    #formularioPDF {
-      display: none;
-      margin-top: 15px;
+    .premium-info h3 {
+      margin-bottom: 10px;
+    }
+    .premium-info ul {
+      list-style-type: disc;
+      padding-left: 20px;
     }
   </style>
 </head>
@@ -65,27 +68,33 @@
     <label for="precio">Introduce el precio de compra:</label>
     <input type="number" id="precio" placeholder="Ejemplo: 300000">
     <button onclick="calcularITP()">Calcular ITP</button>
+    <div id="resultado" class="resultado"></div>
+  </div>
 
-    <div id="resultado"></div>
-
-    <div id="formularioPDF">
-      <h3>Descargar informe PDF</h3>
-      <form id="itpForm" action="https://formspree.io/f/xkgbnbev" method="POST">
-        <input type="text" name="nombre" id="nombre" placeholder="Tu nombre" required>
-        <input type="email" name="email" id="email" placeholder="Tu email" required>
-        <input type="text" name="telefono" id="telefono" placeholder="Tu teléfono" required>
-        <button type="submit">Enviar y descargar PDF</button>
+  <div class="premium-info">
+    <h3>PACK PREMIUM – 2,99 €</h3>
+    <ul>
+      <li>¿Qué es el ITP?</li>
+      <li>Datos personalizados de tu operación</li>
+      <li>Comparativa normativa: antes vs. después de 2025</li>
+      <li>Comparativa territorial por comunidades autónomas</li>
+      <li>Oportunidades fiscales según tu perfil</li>
+      <li>Preguntas frecuentes sobre el ITP</li>
+      <li>Guía rápida para tu compraventa</li>
+      <li>Checklist de documentación necesaria</li>
+    </ul>
+    <div style="text-align: center; margin-top: 20px;">
+      <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
+        <input type="hidden" name="cmd" value="_s-xclick">
+        <input type="hidden" name="hosted_button_id" value="BDATX9YJUAfKL">
+        <button type="submit">Adquirir Pack Premium</button>
       </form>
     </div>
   </div>
 
   <script>
-    let resumenTexto = "";
-
     function calcularITP() {
       const precio = parseFloat(document.getElementById("precio").value);
-      let impuesto = 0;
-
       if (isNaN(precio) || precio <= 0) {
         document.getElementById("resultado").innerText = "Por favor, introduce un número válido.";
         return;
@@ -98,74 +107,30 @@
         { limite: Infinity, tipo: 0.13 }
       ];
 
+      let impuesto = 0;
       let restante = precio;
       let anteriorLimite = 0;
-      let detalles = "";
+      let detalle = "";
 
       for (let tramo of tramos) {
         if (precio > anteriorLimite) {
           const base = Math.min(restante, tramo.limite - anteriorLimite);
           const impTramo = base * tramo.tipo;
           impuesto += impTramo;
-          detalles += `• ${base.toLocaleString('es-ES')} € al ${(tramo.tipo*100).toFixed(0)}% = ${impTramo.toLocaleString('es-ES',{style:'currency',currency:'EUR'})}\n`;
+          detalle += `• ${base.toLocaleString('es-ES')} € al ${(tramo.tipo*100).toFixed(0)}% = ${impTramo.toLocaleString('es-ES',{style:'currency',currency:'EUR'})}<br>`;
           restante -= base;
           anteriorLimite = tramo.limite;
         }
       }
 
       const tipoEfectivo = (impuesto / precio * 100).toFixed(2);
+      const resumen = `<strong>Precio de compra:</strong> ${precio.toLocaleString('es-ES',{style:'currency',currency:'EUR'})}<br>
+                        <strong>ITP total:</strong> ${impuesto.toLocaleString('es-ES',{style:'currency',currency:'EUR'})}<br>
+                        <strong>Tipo efectivo:</strong> ${tipoEfectivo}%<br><br>
+                        <strong>Detalle por tramos:</strong><br>${detalle}`;
 
-      resumenTexto = `Precio de compra: ${precio.toLocaleString('es-ES',{style:'currency',currency:'EUR'})}\n` +
-                     `ITP total: ${impuesto.toLocaleString('es-ES',{style:'currency',currency:'EUR'})}\n` +
-                     `Tipo efectivo: ${tipoEfectivo}%\n\n` +
-                     `Detalle por tramos:\n${detalles}`;
-
-      document.getElementById("resultado").innerHTML = resumenTexto.replaceAll('\n', '<br>') +
-        "<br><em>Tramos informativos:</em><br>• Hasta 600.000 € → 10%<br>• 600.001 - 900.000 € → 11%<br>• 900.001 - 1.500.000 € → 12%<br>• Más de 1.500.000 € → 13%";
-
-      document.getElementById("formularioPDF").style.display = "block";
+      document.getElementById("resultado").innerHTML = resumen;
     }
-
-    async function handleFormSubmit(event) {
-      event.preventDefault();
-      console.log("Enviando formulario...");
-
-      const form = event.target;
-      const formData = new FormData(form);
-
-      const nombre = formData.get("nombre");
-      const email = formData.get("email");
-      const telefono = formData.get("telefono");
-
-      const response = await fetch(form.action, {
-        method: form.method,
-        body: formData,
-        headers: { 'Accept': 'application/json' }
-      });
-
-      if (response.ok) {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-
-        doc.text(`Informe personalizado para: ${nombre}`, 10, 10);
-        doc.text(`Email: ${email}`, 10, 20);
-        doc.text(`Teléfono: ${telefono}`, 10, 30);
-        doc.text("", 10, 40);
-        doc.text(resumenTexto, 10, 50);
-
-        doc.save("informe-itp.pdf");
-        form.reset();
-      } else {
-        alert("Hubo un error al enviar el formulario.");
-      }
-
-      return false;
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      const form = document.getElementById("itpForm");
-      form.addEventListener("submit", handleFormSubmit);
-    });
   </script>
 </body>
 </html>
