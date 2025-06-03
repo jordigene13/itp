@@ -1,2 +1,194 @@
+
 <!DOCTYPE html>
-<!-- El contenido completo ya se encuentra en el canvas -->
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora ITP Catalunya 2025</title>
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f5f2f0;
+      color: #1c211f;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 30px;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+    .container, .premium-info, .formulario-descarga, .formulario-gratis {
+      background: #f5f2f0;
+      padding: 20px;
+      width: 450px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    h2, h3 {
+      text-align: center;
+      font-weight: 800;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      font-size: 1em;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+    input[type="number"], input[type="email"], input[type="text"] {
+      border: 1px solid #ccc;
+      background: #fff;
+      color: #1c211f;
+    }
+    button {
+      background-color: #6d827f;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .resultado, .premium-info ul {
+      margin-top: 15px;
+      padding: 15px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .premium-info ul {
+      list-style-type: disc;
+      padding-left: 20px;
+    }
+    .pp-button {
+      text-align:center;
+      border:none;
+      border-radius:0.25rem;
+      min-width:11.625rem;
+      padding:0 2rem;
+      height:2.625rem;
+      font-weight:bold;
+      background-color:#FFD140;
+      color:#000000;
+      font-family:"Helvetica Neue",Arial,sans-serif;
+      font-size:1rem;
+      line-height:1.25rem;
+      cursor:pointer;
+    }
+    .formulario-descarga, .formulario-gratis {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Calculadora ITP Catalunya 2025</h2>
+    <label for="precio">Introduce el precio de compra:</label>
+    <input type="number" id="precio" placeholder="Ejemplo: 300000">
+    <button onclick="calcularITP()">Calcular ITP</button>
+    <div id="resultado" class="resultado"></div>
+    <div id="formulario-gratis" class="formulario-gratis">
+      <h3>Descarga gratuita</h3>
+      <form action="https://formspree.io/f/xkgbnbev" method="POST">
+        <input type="text" name="nombre" placeholder="Tu nombre" required>
+        <input type="email" name="email" placeholder="Tu email" required>
+        <input type="text" name="telefono" placeholder="Tu teléfono">
+        <button type="submit">Descargar PDF Gratis</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="premium-info">
+    <h3>PACK PREMIUM – 2,99 €</h3>
+    <ul>
+      <li>¿Qué es el ITP?</li>
+      <li>Datos personalizados de tu operación</li>
+      <li>Comparativa normativa: antes vs. después de 2025</li>
+      <li>Comparativa territorial por comunidades autónomas</li>
+      <li>Oportunidades fiscales según tu perfil</li>
+      <li>Preguntas frecuentes sobre el ITP</li>
+      <li>Guía rápida para tu compraventa</li>
+      <li>Checklist de documentación necesaria</li>
+    </ul>
+    <form action="https://www.paypal.com/ncp/payment/RSUXQKGP79CHQ" method="post" target="_blank" style="text-align:center;">
+      <input class="pp-button" type="submit" value="Comprar ahora" />
+    </form>
+  </div>
+
+  <div class="formulario-descarga" id="formulario-descarga">
+    <h3>Descarga tu Informe Premium</h3>
+    <input type="text" id="nombreUsuario" placeholder="Tu nombre">
+    <input type="email" id="emailUsuario" placeholder="Tu correo electrónico">
+    <input type="number" id="precioUsuario" placeholder="Precio de compra">
+    <button onclick="descargarPDF()">Descargar Informe</button>
+  </div>
+
+  <script>
+    function calcularITP() {
+      const precio = parseFloat(document.getElementById("precio").value);
+      if (isNaN(precio) || precio <= 0) {
+        document.getElementById("resultado").innerText = "Por favor, introduce un número válido.";
+        return;
+      }
+
+      const tramos = [
+        { limite: 600000, tipo: 0.10 },
+        { limite: 900000, tipo: 0.11 },
+        { limite: 1500000, tipo: 0.12 },
+        { limite: Infinity, tipo: 0.13 }
+      ];
+
+      let impuesto = 0;
+      let restante = precio;
+      let anteriorLimite = 0;
+      let detalle = "";
+
+      for (let tramo of tramos) {
+        if (precio > anteriorLimite) {
+          const base = Math.min(restante, tramo.limite - anteriorLimite);
+          const impTramo = base * tramo.tipo;
+          impuesto += impTramo;
+          detalle += `• ${base.toLocaleString('es-ES')} € al ${(tramo.tipo*100).toFixed(0)}% = ${impTramo.toLocaleString('es-ES',{style:'currency',currency:'EUR'})}<br>`;
+          restante -= base;
+          anteriorLimite = tramo.limite;
+        }
+      }
+
+      const tipoEfectivo = (impuesto / precio * 100).toFixed(2);
+      const resumen = `<strong>Precio de compra:</strong> ${precio.toLocaleString('es-ES',{style:'currency',currency:'EUR'})}<br>
+                      <strong>ITP total:</strong> ${impuesto.toLocaleString('es-ES',{style:'currency',currency:'EUR'})}<br>
+                      <strong>Tipo efectivo:</strong> ${tipoEfectivo}%<br><br>
+                      <strong>Detalle por tramos:</strong><br>${detalle}`;
+
+      document.getElementById("resultado").innerHTML = resumen;
+      document.getElementById("formulario-gratis").style.display = "block";
+    }
+
+    window.onload = function () {
+      if (window.location.hash === '#descargar-premium') {
+        document.getElementById("formulario-descarga").style.display = 'block';
+      }
+    }
+
+    async function descargarPDF() {
+      const { PDFDocument, rgb, StandardFonts } = PDFLib;
+      const nombre = document.getElementById("nombreUsuario").value;
+      const email = document.getElementById("emailUsuario").value;
+      const precio = document.getElementById("precioUsuario").value;
+      const doc = await PDFDocument.create();
+      const page = doc.addPage([595, 842]);
+      const font = await doc.embedFont(StandardFonts.Helvetica);
+      page.drawText(`Hola ${nombre},`, { x: 50, y: 780, size: 14, font, color: rgb(0, 0, 0) });
+      page.drawText(`Gracias por tu compra.`, { x: 50, y: 760, size: 12, font, color: rgb(0.2, 0.2, 0.2) });
+      page.drawText(`Precio de compra introducido: ${Number(precio).toLocaleString('es-ES')} €`, { x: 50, y: 740, size: 12, font, color: rgb(0.2, 0.2, 0.2) });
+      page.drawText(`Correo electrónico: ${email}`, { x: 50, y: 720, size: 12, font, color: rgb(0.2, 0.2, 0.2) });
+      page.drawText(`Este es un resumen personalizado de tu informe premium ITP.`, { x: 50, y: 700, size: 12, font, color: rgb(0.2, 0.2, 0.2) });
+      const pdfBytes = await doc.save();
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `informe-premium-${nombre}.pdf`;
+      link.click();
+    }
+  </script>
+</body>
+</html>
