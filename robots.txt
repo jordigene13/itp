@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://calculadora-itp-cat.netlify.app/sitemap.xml
